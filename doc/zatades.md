@@ -42,6 +42,8 @@ A REQUIRED record should be always specified in a configuration file, Optional m
 An UNIQUE record can be defined only once in a section, Multiple records instead can be defined multiple times.
 
 ## SECTIONS section
+### INCLUDE record
+Each element in the comma list is a FLOATING section that can the user can define inside the specified section.
 ### custom section
 Each custom section defines a section. This section can contain a RECORDS and/or a SECTIONS section 
 to define records and subsections.
@@ -60,6 +62,3 @@ Uses the same item of custom section. These properties will be inherited by any 
 #### FLOATING and NOFLOAT inline records
 A FLOATING section can be used in any section that includes it with the INCLUDE record and not only the one in which 
 it is defined.
-
-#### INCLUDE record
-Each element in the comma list is a FLOATING section that can the user can define inside the specified section.
