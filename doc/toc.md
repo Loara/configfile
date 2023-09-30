@@ -6,20 +6,26 @@
 - Managing configuration files
   - Data types
 - Style file syntax
-  - root section
+  - ROOT section
     - FORMAT record
     - NL_ESCAPE record
     - QUOTATION record
-  - RECORD and SECTION sections
+  - RECORDS section
     - custom sections
-      - REFER_TO record
       - USEONLY_FORMAT record
       - USEONLY_RECORD record
       - STYLE record
       - LIST record
       - INLINE and EXPLICIT inline records
       - REQUIRED and OPTIONAL inline records
-      - F_DEFAULT record
+      - UNIQUE and MULTIPLE inline records
+  - SECTIONS sections
+    - custom sections
+      - USEONLY_FORMAT record
+      - USEONLY_RECORD record
+      - REQUIRED and OPTIONAL inline records
       - UNIQUE and MULTIPLE inline records
       - CUSTOM_SUBSECTIONS and NOCUSTOM inline records
         - CUSTOMS section
+      - FLOATING and NOFLOAT inline records
+      - INCLUDE record
