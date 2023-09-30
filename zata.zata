@@ -1,0 +1,48 @@
+# A Zata file that defines Zata style
+> root
+  format zata
+> sections
+  > root
+    > records
+      > format
+        style choice
+        list zata
+  > records
+    optional
+    floating
+    custom_subsections
+    > customs
+      > records
+        > useonly_record
+          style comma
+          optional
+          multiple
+        > style
+          style choice
+          list raw,num,comma,choice,flag
+        > list
+          useonly_record style,choice
+          style comma
+        > optional
+          style flag
+        > multiple
+          style flag
+      > sections #Empity: records doesn't have subsections
+  > sections
+    optional
+    floating
+    custom_subsections
+    > customs
+      > records
+        > useonly_record
+          style comma
+          optional
+          multiple
+        > optional
+          style flag
+        > multiple
+          style flag
+        > custom_subsections
+          style flag
+      > sections
+        include sections,records
