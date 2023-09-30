@@ -3,3 +3,19 @@
   - [Formats](confile.md#configuration-file-formats)
     - [Windows .INI / Linux .desktop / Systemd units](confile.md#windows-ini--linux-desktop--systemd-units)
     - [JSON](confile.md#json)
+- Managing configuration files
+  - Data types
+- Style file syntax
+  - root section
+    - FORMAT record
+    - NL_ESCAPE record
+    - QUOTATION record
+  - RECORD and SECTION sections
+    - custom sections
+      - REQUIRED and OPTIONAL inline records
+      - REQUIRES_RECORD record
+      - FORMAT record
+      - LIST record
+      - DEFAULT record
+      - INLINE and EXPLICIT inline records
+      - UNIQUE and MULTIPLE inline record
