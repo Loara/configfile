@@ -1,1 +1,0 @@
-/home/loara/ProgettiRust/configfile/zataver/target/debug/zataver: /home/loara/ProgettiRust/configfile/zataver/src/ctree.rs /home/loara/ProgettiRust/configfile/zataver/src/main.rs /home/loara/ProgettiRust/configfile/zataver/src/parse.rs
