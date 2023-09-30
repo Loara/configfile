@@ -13,9 +13,10 @@
   - RECORD and SECTION sections
     - custom sections
       - REQUIRED and OPTIONAL inline records
-      - REQUIRES_RECORD record
-      - FORMAT record
+      - REQUIRE_FORMAT record
+      - REQUIRE_RECORD record
+      - STYLE record
       - LIST record
-      - DEFAULT record
+      - FIRST_DEFAULT and NODEFAULT inline records
       - INLINE and EXPLICIT inline records
       - UNIQUE and MULTIPLE inline record
