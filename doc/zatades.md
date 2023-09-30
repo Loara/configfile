@@ -5,10 +5,10 @@
 Can contain one of the following values:
 - `zata` the Zata configuration file format
 
-## RECORDS section
-This section is __floating__.
+## RECORDS and ROOT_RECORDS section
+ROOT_RECORDS defines records in root section, RECORDS instead in any other record. RECORDS is __floating__.
 ### custom sections
-Each section here represents a record specification. These sections are __unique__.
+Each section here represents a record specification.
 
 #### USEONLY_RECORD record
 Its `value` should be a comma list with at least one element:
@@ -38,10 +38,12 @@ A comma separated list of possible values a `choice` record can assume.
 #### REQUIRED and OPTIONAL flag records
 A REQUIRED record should be always specified in a configuration file, Optional may be omitted.
 
-#### UNIQUE and MULTIPLE flag records
-An UNIQUE record can be defined only once in a section, Multiple records instead can be defined multiple times.
+#### MULTIPLE flag records
+MULTIPLE records instead can be defined multiple times.
 
-## SECTIONS section
+## SECTIONS and ROOT_SECTIONS sections
+ROOT_SECTIONS defines sections in root sections, SECTIONS in any other section. SECTIONS is __floating__.
+
 ### INCLUDE record
 Each element in the comma list is a FLOATING section that can the user can define inside the specified section.
 ### custom section
@@ -49,16 +51,15 @@ Each custom section defines a section. This section can contain a RECORDS and/or
 to define records and subsections.
 
 #### USEONLY_RECORD record
-#### REQUIRED and OPTIONAL inline records
-#### UNIQUE and MULTIPLE inline records
+#### OPTIONAL flag record
+#### MULTIPLE flag record
 As before.
 
-#### CUSTOM_SUBSECTIONS and NOCUSTOM flag record
+#### CUSTOM_SUBSECTIONS flag record
 If this section is flagged with CUSTOM_SUBSECTIONS then an user can define any subsection inside it.
 Each of these subsections will have the same attributes defined in CUSTOMS subsection
 ##### CUSTOMS section
 Uses the same item of custom section. These properties will be inherited by any subsection defined by the user.
 
-#### FLOATING and NOFLOAT inline records
-A FLOATING section can be used in any section that includes it with the INCLUDE record and not only the one in which 
-it is defined.
+#### FLOATING records
+Can be defined only for sections defined in ROOT_SECTIONS, not in SECTIONS. A FLOATING section can _only_ be used in any section that includes it with the INCLUDE record and not only the one in which it is defined.
