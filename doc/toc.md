@@ -5,6 +5,7 @@
     - [JSON](confile.md#json)
 - Managing configuration files
   - Data types
+- [Zata file format](zata.md)
 - Style file syntax
   - ROOT section
     - FORMAT record
