@@ -1,7 +1,7 @@
 # A Zata file that defines Zata style
 > root
   format zata
-> sections
+> root_sections
   > root
     > records
       > format
@@ -32,6 +32,10 @@
     optional
     floating
     custom_subsections
+    > records
+      > include
+        style comma
+        optional
     > customs
       > records
         > useonly_record
@@ -45,4 +49,4 @@
         > custom_subsections
           style flag
       > sections
-        include sections,records
+        include /sections/sections,/sections/records
