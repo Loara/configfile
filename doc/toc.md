@@ -12,11 +12,14 @@
     - QUOTATION record
   - RECORD and SECTION sections
     - custom sections
-      - REQUIRED and OPTIONAL inline records
-      - REQUIRE_FORMAT record
-      - REQUIRE_RECORD record
+      - REFER_TO record
+      - USEONLY_FORMAT record
+      - USEONLY_RECORD record
       - STYLE record
       - LIST record
-      - FIRST_DEFAULT and NODEFAULT inline records
       - INLINE and EXPLICIT inline records
-      - UNIQUE and MULTIPLE inline record
+      - REQUIRED and OPTIONAL inline records
+      - F_DEFAULT record
+      - UNIQUE and MULTIPLE inline records
+      - CUSTOM_SUBSECTIONS and NOCUSTOM inline records
+        - CUSTOMS section
