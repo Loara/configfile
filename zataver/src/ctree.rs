@@ -1,7 +1,13 @@
 use std::collections::HashMap;
 use std::string::ToString;
 
-fn indent(out : &mut String, ind : u32){
+pub struct Record{
+    pub line : usize,
+    pub val : String,
+}
+
+fn indent(out : &mut String, ind : u32, line : usize){
+    out.push_str(format!("{:3}", line).as_str());
     for _i in 0..ind {
         out.push_str("  ");
     }
@@ -9,7 +15,8 @@ fn indent(out : &mut String, ind : u32){
 
 
 pub struct Section{
-    recs : HashMap<String, Vec<String>>,
+    pub line : usize,
+    recs : HashMap<String, Vec<Record>>,
     secs : HashMap<String, Vec<Section>>,
 }
 
@@ -22,16 +29,16 @@ impl ToString for Section{
     }
 }
 
-
 impl Section{
-    pub fn new() -> Section{
+    pub fn new(line : usize) -> Section{
         Section{
+            line,
             recs : HashMap::new(),
             secs : HashMap::new(),
         }
     }
 
-    pub fn get_record(& self, nay : & str) -> Option<&[String]> {
+    pub fn get_record(& self, nay : & str) -> Option<&[Record]> {
         match self.recs.get(nay) {
             None => return None,
             Some(v) => return Some(v.as_ref()),
@@ -45,10 +52,14 @@ impl Section{
         }
     }
 
-    pub fn add_record(&mut self, n : String, val : String){
+    pub fn sections(&self) -> &HashMap<String, Vec<Section>> {
+        &self.secs
+    }
+
+    pub fn add_record(&mut self, n : String, val : Record){
         match self.recs.get_mut(&n) {
             None => {
-                let mut id = Vec::<String>::new();
+                let mut id = Vec::<Record>::new();
                 id.push(val);
                 self.recs.insert(n, id);
             }
@@ -78,17 +89,17 @@ impl Section{
     pub fn string_build(&self, out : &mut String, ind : u32){
         for r in &self.recs {
             for v in r.1 {
-                indent(out, ind);
+                indent(out, ind, v.line);
                 out.push_str("K: ");
                 out.push_str(&r.0);
                 out.push_str(" V: ");
-                out.push_str(&v);
+                out.push_str(&v.val);
                 out.push('\n');
             }
         }
         for r in &self.secs {
             for v in r.1  {
-                indent(out, ind);
+                indent(out, ind, v.line);
                 out.push_str("Section: ");
                 out.push_str(&r.0);
                 out.push('\n');

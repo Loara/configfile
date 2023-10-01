@@ -1,10 +1,10 @@
-use crate::ctree::Section;
+use crate::ctree::{Record, Section};
 
 use std::str::Chars;
 use std::io::BufRead;
 use std::iter::Peekable;
 
-fn is_space(c : char) -> bool {
+pub fn is_space(c : char) -> bool {
     c == ' ' || c == '\n'
 }
 
@@ -55,7 +55,31 @@ fn parse_val(line : &mut Peekable<Chars>) -> String {
     val
 }
 
-fn discard_ls(su : &mut Peekable<Chars>) {
+pub fn parse_val_term(line : &mut Peekable<Chars>, chr : char) -> String {
+    let mut tmp = String::new();
+    let mut val = String::new();
+
+    let mut com = false;
+    
+    for v in &mut *line{
+        if v == chr {
+            com = true;
+            break;
+        }
+        //remove trailing spaces
+        tmp.push(v);
+        if !is_space(v) {
+            val.push_str(&tmp);
+            tmp.clear();
+        }
+    }
+    if com {
+        line.last();
+    }
+    val
+}
+
+pub fn discard_ls<I : Iterator<Item = char>>(su : &mut Peekable<I>) {
     loop {
         match su.peek() {
             None => return,
@@ -76,7 +100,7 @@ fn discard_ls(su : &mut Peekable<Chars>) {
 }
 
 pub fn parse_section<T : BufRead>(rd : &mut T, is_root : bool, line : &mut usize) -> Section {
-    let mut ret = Section::new();
+    let mut ret = Section::new(*line);
     let mut buf = String::new();
     loop{
         buf.clear();
@@ -107,7 +131,7 @@ pub fn parse_section<T : BufRead>(rd : &mut T, is_root : bool, line : &mut usize
                     _ => {
                         let name = parse_id(&mut it);
                         discard_ls(&mut it);
-                        let val = parse_val(&mut it);
+                        let val = Record{line : *line, val : parse_val(&mut it)};
                         ret.add_record(name, val);
                     }
                 }
