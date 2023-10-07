@@ -1,9 +1,53 @@
 use std::collections::HashMap;
 use std::string::ToString;
 
-pub struct Record{
+pub struct RecordVal{
     pub line : usize,
     pub val : String,
+}
+
+pub struct RecordFlag{
+    pub line : usize,
+}
+
+pub enum Record{
+    Val(RecordVal),
+    Flag(RecordFlag),
+}
+
+impl Record{
+    pub fn new_val(line : usize, val : String) -> Record {
+        Record::Val(RecordVal{
+            line,
+            val,
+        })
+    }
+
+    pub fn new_flag(line : usize) -> Record {
+        Record::Flag(RecordFlag{
+            line,
+        })
+    }
+
+    pub fn line(&self) -> usize {
+        match self {
+            Record::Val(v) => return v.line,
+            Record::Flag(v) => return v.line,
+        }
+    }
+
+    pub fn string_build(&self, out : &mut String){
+        match self {
+            Record::Val(v) => {
+                out.push_str(" V: ");
+                out.push_str(&v.val);
+                out.push('\n');
+            }
+            Record::Flag(v) => {
+                out.push('\n');
+            }
+        }
+    }
 }
 
 fn indent(out : &mut String, ind : u32, line : usize){
@@ -89,12 +133,8 @@ impl Section{
     pub fn string_build(&self, out : &mut String, ind : u32){
         for r in &self.recs {
             for v in r.1 {
-                indent(out, ind, v.line);
-                out.push_str("K: ");
-                out.push_str(&r.0);
-                out.push_str(" V: ");
-                out.push_str(&v.val);
-                out.push('\n');
+                indent(out, ind, v.line());
+                v.string_build(out);
             }
         }
         for r in &self.secs {

@@ -1,4 +1,4 @@
-use crate::ctree::Record;
+use crate::ctree::{Record, RecordVal};
 
 pub trait AssertExists {
     type R;
@@ -50,13 +50,11 @@ impl AssertFlag for Option<&Record> {
         match self {
             None => return false,
             Some(v) => {
-                if v.val != "" {
-                    panic!("Flags can't hold values");
+                match v {
+                    Record::Flag(_i) => return true,
+                    _ => return false,
                 }
-                else {
-                    return true;
-                }
-            }
+            },
         }
     }
 }
@@ -64,6 +62,19 @@ impl AssertFlag for Option<&Record> {
 impl AssertFlag for Option<&[Record]> {
     fn assert_flag(&self) -> bool {
         self.assert_unique().assert_flag()
+    }
+}
+
+pub trait AssertVal {
+    fn assert_val(&self) -> &RecordVal;
+}
+
+impl AssertVal for Record {
+    fn assert_val(&self) -> &RecordVal {
+        match self {
+            Record::Val(v) => return &v,
+            _ => panic!("Not a valid value record"),
+        }
     }
 }
 
@@ -82,12 +93,17 @@ pub trait AssertChoice {
 
 impl AssertChoice for Record {
     fn assert_choice(&self, test : &[&str]) -> usize{
-        for i in 0..test.len() {
-            if &self.val == test[i] {
-                return i;
-            }
+        match self {
+            Record::Val(v) => {
+                for i in 0..test.len() {
+                    if v.val == test[i] {
+                        return i;
+                    }
+                }
+                panic!("Unknown choice");
+            },
+            _ => panic!("Not a value record"),
         }
-        panic!("Unknown choice");
     }
 }
 
@@ -108,40 +124,4 @@ impl<I> AssertUseonly for Option<I> {
     }
 }
 
-/*
 
-pub fn assert_exist<I>(rec : Option<&[I]>) -> &[I] {
-    rec.expect("Required item not defined")
-}
-
-pub fn assert_unique<I>(rec : &[I]) -> &I {
-    match rec.len() {
-        0 => panic!("Required item not defined"),
-        1 => return &rec[0],
-        _ => panic!("Unique item defined multiple times"),
-    }
-}
-
-pub fn assert_flag(rec : Option<&[Record]>) -> bool {
-    match rec {
-        None => return false,
-        Some(v) => {
-            if assert_unique(v).val == "" {
-                return true;
-            }
-            else{
-                panic!("A flag can't hold values");
-            }
-        }
-    }
-}
-
-pub fn assert_useonly_record<'a>(rec : Option<&'a Record>, val : &str, test : [&str]) -> Option<&'a Record> {
-    match rec {
-        None => ,
-        Some(_v) => assert_choice(val, test),
-    }
-    rec
-}
-
-*/

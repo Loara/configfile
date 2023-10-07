@@ -1,6 +1,6 @@
-use crate::ctree::{Record, Section};
-use crate::parse::{is_space, discard_ls};
-use crate::filters::{AssertExists, AssertUnique, AssertFlag, AssertChoice, AssertUseonly}; 
+use crate::ctree::{Record, Section, RecordVal};
+use crate::pars_tools::{is_space, discard_ls};
+use crate::filters::{AssertExists, AssertUnique, AssertFlag, AssertChoice, AssertUseonly, AssertVal}; 
 
 use std::iter::Peekable;
 use std::string::ToString;
@@ -95,7 +95,7 @@ fn get_comma(s : &str) -> Vec<String> {
     ret
 }
 
-fn to_comma(r : &Record) -> Vec<String> {
+fn to_comma(r : &RecordVal) -> Vec<String> {
     get_comma(&r.val)
 }
 
@@ -107,11 +107,13 @@ fn parse_record_spec(mu : &Section) -> RecordSpec{
          .assert_choice(&STYLES));
     ret.useonly = mu.get_record("useonly_record")
         .assert_unique()
+        .map(&Record::assert_val)
         .map(&to_comma);
 
     ret.list = mu.get_record("list")
         .assert_unique()
         .assert_useonly(ret.style, &[CHOICE_IDX])
+        .map(&Record::assert_val)
         .map(&to_comma);
 
     ret.opt = mu.get_record("optional")
@@ -124,6 +126,7 @@ fn parse_record_spec(mu : &Section) -> RecordSpec{
 pub fn parse_specs(mu : &Section) -> Vec<RecordSpec> {
     let mut ret = Vec::<RecordSpec>::new();
     for record_spec in mu.get_section("records").assert_exists().assert_unique().sections() {
+        println!("Record {}", record_spec.0);
         ret.push(parse_record_spec(record_spec.1.as_slice().assert_unique()));
     }
     ret
