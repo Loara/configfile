@@ -20,9 +20,9 @@ to serialize a valid configuration into a file. There are several different form
 ### Windows .INI / Linux .desktop / Systemd units
 This is not an unique configuration file formats, because every application added new limitation or features from the original format represented by the classic MS-DOS/Windows `.INI` files. Actually we can determine some common rules which are shared between these styles.
 
-Each section and record specification should lie on their own line, however many formats allows to split a record in multiple lines by using escape characters.
+Each section and entry specification should lie on their own line, however many formats allows to split a record in multiple lines by using escape characters.
 
-Sections are defined between two square bracket `[`, `]` enclosing the section name, and any record immediately following a section specification are inserted in that section. A new section declaration will start a new section, therefore you can't define new sections inside other section that are not the root one (which can't be explicitly declared).
+Sections are defined between two square bracket `[`, `]` enclosing the section name, and any record immediately following a section specification are inserted in that section. A new section declaration will start a new section, therefore you can't define subsections.
 
 Records can be defined with the following syntax:
 
@@ -45,6 +45,17 @@ instead the following one may or may not be equivalent to the preceding ones
 whereas this is definitively not equivalent
 
     key = " val "
+
+There isn't a standard way to specify flags in INI files. You can specify a flag either by specifying only its name
+
+    name
+
+or by using a record with empty value or a dummy value:
+
+    name=
+    name=1
+    name=true
+    name=yes
 
 #### Example
 
@@ -87,9 +98,16 @@ where `json_ent` can be one of the following:
 
       "key" : num,
 
-- an array (comma-list) of `json_ent`:
+- an array of `json_ent`:
 
       "key" : [ json_ent1, json_ent2, ..., json_entN ],
+
+  since in JSON you can't specify different records in a section with the same key you can use arrays to emulate multiple records.
+
+Flags in JSON are just boolean records set to `true`:
+
+    "flag" : true,
+
 
 #### Example
 
