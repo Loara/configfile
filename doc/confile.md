@@ -1,20 +1,20 @@
 # Configuration files
 ## Overview
-A _configuration_ is a list of _records_ contained in _sections_. Each record is characterized by a _key_ and a _value_ which are both UTF-8 encoded strings. 
-Keys should contain only alphanumeric characters (`A-Z`, `a-z`, `0-9`) and undescores (`_`), but different configuration formats may allow other characters.
-Keys can't be empty, instead values might be empty and can potentially contain any valid Unicode character, however the chosen configuration style usually imposes different limitations.
+A _configuration_ is a collection of textual entries usually held in one or more text files in order to allow the user to customize the behaviour of an application/service by just modifying the configuration. There're two kind of entries in a configuration:
+ - _flags_, which are characterized by a _name_;
+ - _records_, which instead are characterized by a _key_ and a _value_.
 
-Every record should be declared inside a _section_, which is just a named container of records and other (sub)sections. 
-Section names should follow the same rules of record keys. 
-Inside a section can't coexist multiple records with the same key and multiple subsections with the same name.
-Every configuration file has a unique _root section_ that should not be defined explicitly but automatically contains any
-record or section not defined in any other section.
+Records in a configuration can be organized in _sections_. Every section has a _section name_ and contains zero or more entries or other sections. Notice that at this point _names_, _keys_, _values_ and _section names_ are arbitrary nonempty unescaped Unicode strings, however many backends usually introduce encoding assumptions (usually UTF-8) and character limitations in names and/or values.
 
-Therefore, a configuration file can always be represented as a _tree_ where the leaves are records (or empty sections), 
+In a configuration every entry/section should be contained in a _parent section_, the only section that is not contained in any other section is the _root_ section. The root section doesn't have a section name, can't be directly accessed and in configuration files it's never specified.
+
+Inside a section flags are identified by their names, therefore you can't have two or more flags with the same name in the same section. However, records aren't identified by their key/value, so in a single section you can have multiple records with the same key and/or value. When you want to retrieve a record by key from a section you usually won't get a single value, buy an _ordered_ list of zero or more values, each of them associated to a record in that section with the specified key.
+
+A configuration can always be represented as a _tree_ where the leaves are entries (or empty sections), 
 nodes that are not leaves are sections and the root node is the root section.
 
 ## Configuration file formats
-When you want to write a configuration file for your project you should first choose a valid _configuration file format_ in order 
+When you want to write a configuration to a file for your project you should first choose a valid _configuration file format_ in order 
 to serialize a valid configuration into a file. There are several different formats you can use, here we'll list some of them:
 
 ### Windows .INI / Linux .desktop / Systemd units
@@ -108,3 +108,21 @@ where `json_ent` can be one of the following:
     }
 
 Notice that inside section `Section1` we have defined the subsection `Section1b`.
+
+## XML
+Even XML files can be seen as configuration files, for example by identifying sections with tags:
+
+    <section flag1 key1="value1" key2="value2" flag3 ... />
+
+and subsections with child tags:
+
+    <parent_section ... >
+        <subsection1 />
+        <subsection2 flag1>
+            <subsubsection1 key1="value1" />
+        </subsection2>
+        ...
+    </parent_section>
+
+and so on.
+    
