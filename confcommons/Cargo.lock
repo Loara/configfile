@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "zataver"
+name = "confcommons"
 version = "0.1.0"
