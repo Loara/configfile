@@ -108,6 +108,7 @@ Flags in JSON are just boolean records set to `true`:
 
     "flag" : true,
 
+JSON files are more suited to holding data rather than as a configuration file, because JSON (and TOML) stores not only the value of a record but also its type (string, number, array, boolean, structure, ...) nwhereas in a classical configuration file all the values are automatically strings and is duty of the application to interpret them. 
 
 #### Example
 
@@ -142,5 +143,24 @@ and subsections with child tags:
         ...
     </parent_section>
 
-and so on.
-    
+and so on. Moreover, in a _leaf_ section (a section without subsections) you can specify a single _anonymous record_, that is a record without the key, by specifying its value as the only child element of the section tag:
+
+    <section>Anonymous value</section>
+
+Anonymous records can be viewed as normal records with empty key name.
+
+## Hyprland configuration file
+The Hyprland team uses a [custom configuration file format](https://wiki.hyprland.org/Configuring/Configuring-Hyprland/) to configure the Hyprland compositor. Their configuration file format was inspired by both JSON and INI formats. Key-value records can be expressed in the same format as in INI specifications:
+
+    key = value
+
+whereas sections (and subsections) follows the JSON specifications (without the double quotes):
+
+    section {
+      ...
+      subsection {
+        ...
+      }
+    }
+
+It's fundamental that `{` lies on the same line of the section name to avoid to interpert it as a record.
