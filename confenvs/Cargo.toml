@@ -1,9 +1,10 @@
 [package]
-name = "confcommons"
+name = "confenvs"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-color-art = "0.3"
+home = "0.5.9"
+confcommons = {version = "0.1.0", path = "../confcommons"}

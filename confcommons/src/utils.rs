@@ -1,5 +1,7 @@
 use std::iter::Peekable;
 
+pub const SPACES : [char; 2] = [' ', '\t'];
+
 pub fn discard_line<I : Iterator<Item = char>>(r : &mut I){
     for v in r {
         if v == '\n' {
@@ -20,17 +22,77 @@ pub fn skip_spaces<I : Iterator<Item = char>>(r : &mut Peekable<I>){
     }
 }
 
-pub struct Trailer<'a, I : Iterator<Item = char>> {
-    iter : I,
-    das : &'a [char],
+pub struct NLBreak<I : IntoIterator<Item = char>> {
+    iter : I::IntoIter,
+    esc : char,
+    escpd : Option<char>,
 }
 
-impl<'a, I : Iterator<Item = char>> Trailer<'a, I> {
-    pub fn new(iter : I, das : &'a [char]) -> Self {
-        Trailer{
-            iter,
-            das,
+impl<I : IntoIterator<Item = char>> NLBreak<I> {
+    pub fn new(init : I, esc : char) -> Self {
+        Self{
+            iter : init.into_iter(),
+            esc,
+            escpd : None,
         }
+    }
+}
+
+impl<I : Iterator<Item = char>> Iterator for NLBreak<I> {
+    type Item = char;
+
+    fn next(&mut self) -> Option<char> {
+        if self.escpd.is_some() {
+            return self.escpd.take();
+        }
+        match self.iter.next() {
+            None => return None,
+            Some(v) => {
+                if v == self.esc {
+                    match self.iter.next() {
+                        None => return Some(v),
+                        Some(vv) => {
+                            if vv == '\n' {
+                                for h in &mut self.iter {
+                                    if h != ' ' && h != '\t' && h != '\n' {
+                                        return Some(h);
+                                    }
+                                }
+                                return None;
+                            }
+                            else{
+                                self.escpd = Some(vv);
+                                return Some(self.esc);
+                            }
+                        }
+                    }
+                }
+                else {
+                    return Some(v);
+                }
+            }
+        }
+    }
+}
+
+
+pub struct Trailer<'a, I : IntoIterator<Item = char>> {
+    iter : I::IntoIter,
+    das : &'a [char],
+    sps : &'a [char],
+}
+
+impl<'a, I : IntoIterator<Item = char>> Trailer<'a, I> {
+    pub fn new_spaces(init : I, das : &'a [char], sps : &'a [char]) -> Self {
+        Trailer{
+            iter : init.into_iter(),
+            das,
+            sps,
+        }
+    }
+
+    pub fn new(init : I, das : &'a [char]) -> Self {
+        Self::new_spaces(init, das, &SPACES)
     }
 
     pub fn rebase(&mut self, das : &'a [char]) {
@@ -38,7 +100,7 @@ impl<'a, I : Iterator<Item = char>> Trailer<'a, I> {
     }
 }
 
-impl<'a, I : Iterator<Item = char>> Iterator for Trailer<'a, I> {
+impl<'a, I : IntoIterator<Item = char>> Iterator for Trailer<'a, I> {
     type Item = (String, Option<char>);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -47,11 +109,10 @@ impl<'a, I : Iterator<Item = char>> Iterator for Trailer<'a, I> {
         let mut brk = Option::<char>::None;
 
         for v in &mut self.iter {
-            match v {
-                ' ' | '\t' => {
-                    buf.push(v);
-                }
-                _ => {
+            if self.sps.contains(&v) {
+                buf.push(v);
+            }
+            else {
                     if self.das.contains(&v) {
                         brk = Some(v);
                         break;
@@ -64,7 +125,6 @@ impl<'a, I : Iterator<Item = char>> Iterator for Trailer<'a, I> {
                         ret.push(v);
                     }
                 }
-            }
         }
 
         if ret.is_empty() && brk.is_none() {
@@ -79,32 +139,3 @@ impl<'a, I : Iterator<Item = char>> Iterator for Trailer<'a, I> {
 pub fn skip_trailing_spaces<I : Iterator<Item = char>>(iter : &mut I, unt : &[char]) -> String {
     Trailer::new(iter, unt).next().unwrap_or(("".to_string(), None)).0
 }
-
-/*
-pub fn skip_trailing_spaces<I : Iterator<Item = char>>(r : &mut Peekable<I>, unt : &[char]) -> String {
-    let mut ret = String::new();
-    let mut buf = String::new();
-    loop {
-        match r.peek() {
-            None => return ret,
-            Some(v) => match v {
-                ' ' | '\t' => {
-                    buf.push(*v);
-                    r.next();
-                }
-                '\n' => return ret,
-                _ => {
-                    if unt.contains(v) {
-                        return ret;
-                    }
-                    else {
-                        ret.push_str(buf.as_str());
-                        buf.clear();
-                        ret.push(*v);
-                        r.next();
-                    }
-                }
-            }
-        }
-    }
-}*/

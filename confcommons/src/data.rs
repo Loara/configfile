@@ -80,7 +80,7 @@ impl StrSection{
 
     fn indent<O : std::io::Write>(out : &mut O, h : usize) -> Result<(), std::io::Error>{
         let sp = " ".as_bytes();
-        for _i in [0..h] {
+        for _i in 0..h {
             out.write_all(sp)?;
         }
         Ok(())
