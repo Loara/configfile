@@ -1,6 +1,5 @@
 use crate::data::StrSection;
-use std::iter::Peekable;
-use crate::utils::{skip_spaces, Trailer};
+use crate::utils::{LineBreaker, Trailer};
 
 pub trait Backend<I : IntoIterator<Item = char>> : Iterator<Item = StrSection> + Sized{
     fn new(iter : I) -> Self;
@@ -8,7 +7,7 @@ pub trait Backend<I : IntoIterator<Item = char>> : Iterator<Item = StrSection> +
 
 
 pub struct INIBackend<I : IntoIterator<Item = char>> {
-    iter : Peekable<I::IntoIter>,
+    iter : I::IntoIter,
 }
 
 
@@ -16,7 +15,7 @@ impl<I : IntoIterator<Item = char>> Backend<I> for INIBackend<I> {
 
     fn new(it : I) -> Self {
         INIBackend{
-            iter : it.into_iter().peekable()
+            iter : it.into_iter()
         }
     }
 
@@ -35,58 +34,51 @@ impl<I : IntoIterator<Item = char>> Iterator for INIBackend<I> {
         let mut root_kv = Vec::<(String, String)>::new();
         let mut root_flg = Vec::<String>::new();
 
-        loop{
-            skip_spaces(&mut self.iter);
-            match self.iter.peek() {
-                None => break,
-                Some(v) => match v {
-                    '\n' => {
-                        self.iter.next();
-                        continue;
-                    },
-                    '[' => {
-                        self.iter.next();
-                        let (name, brk) = Trailer::new(&mut self.iter, &[']', '\n']).next().expect("Invalid section declaration");
-                        if brk != Some(']') {
-                            panic!("Sections should be ended by ] character");
-                        }
-                        
-                        if !in_root {
-                            root_secs.push((nm, StrSection::new(Vec::new(), kv, flg)));
-                            kv = Vec::new();
-                            flg = Vec::new();
-                        }
-                        nm = name;
-                        in_root = false;
+        let lines = LineBreaker::new(&mut self.iter);
+
+        for line in lines{
+            let mut line_iter = line.chars().peekable();
+            match line_iter.peek() {
+                None => continue,
+                Some('[') => {
+                    line_iter.next();
+                    let (name, brk) = Trailer::new(&mut line_iter, &[']']).next().expect("Invalid section declaration");
+                    if brk != Some(']') {
+                        panic!("Sections should be ended by ] character");
                     }
-                    _ => {
-                        let mut trl = Trailer::new(&mut self.iter, &['=', '\n']);
-                        let (key, int) = trl.next().unwrap_or(("".to_string(), None));
-                        match int {
-                            None => {
+                        
+                    if !in_root {
+                        root_secs.push((nm, StrSection::new(Vec::new(), kv, flg)));
+                        kv = Vec::new();
+                        flg = Vec::new();
+                    }
+                    nm = name;
+                    in_root = false;
+                }
+                Some(_) => {
+                    let mut trl = Trailer::new(&mut line_iter, &['=']);
+                    let (key, int) = trl.next().unwrap_or(("".to_string(), None));
+                    match int {
+                        None => {
+                            if in_root {
+                                root_flg.push(key);
+                            }
+                            else {
                                 flg.push(key);
                             }
-                            Some(vv) => match vv{
-                                '=' => {
-                                    trl.rebase(&['\n']);
-                                    let val = trl.next().unwrap_or(("".to_string(), None)).0;
-                                    if in_root {
-                                        root_kv.push((key, val));
-                                    }
-                                    else {
-                                        kv.push((key, val));
-                                    }
+                        }
+                        Some(vv) => match vv{
+                            '=' => {
+                                trl.rebase(&[]);
+                                let val = trl.next().unwrap_or(("".to_string(), None)).0;
+                                if in_root {
+                                    root_kv.push((key, val));
                                 }
-
-                                _ => {
-                                    if in_root {
-                                        root_flg.push(key);
-                                    }
-                                    else {
-                                        flg.push(key);
-                                    }
+                                else {
+                                    kv.push((key, val));
                                 }
                             }
+                            _ => {}
                         }
                     }
                 }

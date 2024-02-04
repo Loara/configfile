@@ -130,6 +130,44 @@ impl KVProps {
     }
 }
 
+pub fn trans_raw(val : &str) -> Result<&str, String> {
+    Ok(val)
+}
+
+pub fn trans_num(val : &str) -> Result<i64, String> {
+    val.parse::<i64>().map_err(|_x| "Invalid number".to_string())
+}
+
+pub fn trans_float(val : &str) -> Result<f64, String> {
+    val.parse::<f64>().map_err(|_x| "Invalid number".to_string())
+}
+
+pub fn trans_clr(val : &str) -> Result<Color, String> {
+    val.parse::<Color>().map_err(|_x| "Invalid number".to_string())
+}
+
+pub fn trans_chc(val : &str, vcs : &[String]) -> Result<(usize, String), String> {
+    for (idx, v) in vcs.iter().enumerate() {
+        if val == v {
+            return Ok((idx, v.clone()));
+        }
+    }
+    return Err("Invalid choice value".to_string());
+}
+
+pub fn trans_arr<F, R>(val : &str, arrv : F, layout : &ArrLyt) -> Result<Vec<R>, String> where F : Fn(&str) -> Result<R, String> {
+    match layout {
+        ArrLyt::Char(c) => {
+            let ter = vec![*c];
+            return Trailer::new(val.chars(), &ter).map(|x| arrv(&x.0)).collect::<Result<Vec<R>, String>>();
+        }
+        ArrLyt::Flat => {
+            return Ok(vec![arrv(val)?]);
+        }
+    }
+}
+
+
 pub fn translate(val : &str, prp : &KVClass) -> Result<KVData, String> {
     match prp {
         KVClass::Raw => return Ok(KVData::Raw(val.to_string())),
@@ -137,14 +175,14 @@ pub fn translate(val : &str, prp : &KVClass) -> Result<KVData, String> {
         KVClass::Float => return Ok(KVData::Float(val.parse::<f64>().map_err(|_x| "Invalid float".to_string())?)),
         KVClass::Clr => return Ok(KVData::Clr(val.parse::<Color>().map_err(|_x| "Invalid color".to_string())?)),
         KVClass::Chc(vcs) => {
-            for (idx, v) in vcs.iter().enumerate() {
-                if val == v {
-                    return Ok(KVData::Chc((idx, v.clone())));
-                }
-            }
-            return Err("Invalid choice value".to_string());
+            return Ok(KVData::Chc(trans_chc(val, &vcs)?));
         }
         KVClass::Arr(septy) => {
+            let callback = | da : &str | -> Result<KVData, String> {
+                translate(da, &septy.typ)
+            };
+            return Ok(KVData::Arr(trans_arr(val, callback, &septy.layout)?));
+            /*
             match septy.layout {
                 ArrLyt::Char(c) => {
                     let ter = vec![c];
@@ -155,6 +193,7 @@ pub fn translate(val : &str, prp : &KVClass) -> Result<KVData, String> {
                     return Ok(KVData::Arr(vec![translate(val, &septy.typ)?]));
                 }
             }
+            */
         }
     }
 }
@@ -201,3 +240,10 @@ pub fn collect_kv(val : &StrSection, info : &HashMap<String, KVProps>) -> Result
     Ok(ret)
 }
 
+pub struct SecClass {
+    pub kvs : HashMap<String, KVClass>,
+}
+
+pub struct SecData {
+    pub kvs : HashMap<String, KVData>,
+}
